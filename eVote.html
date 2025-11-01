@@ -1,0 +1,1544 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Election Management System</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 600px;
+      width: 100%;
+      padding: 2.5rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      color: #1a202c;
+      font-size: 2rem;
+      margin: 0 0 0.5rem 0;
+      font-weight: 700;
+    }
+
+    .header p {
+      color: #718096;
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .user-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: #f7fafc;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .logout-btn {
+      background: #e53e3e;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: background 0.3s;
+    }
+
+    .logout-btn:hover {
+      background: #c53030;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      color: #2d3748;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"],
+    input[type="datetime-local"] {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+      box-sizing: border-box;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .candidates {
+      margin-bottom: 1.5rem;
+    }
+
+    .candidate-option {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .candidate-option:hover {
+      border-color: #667eea;
+      background: #f7fafc;
+    }
+
+    .candidate-option.selected {
+      border-color: #667eea;
+      background: #edf2f7;
+    }
+
+    .candidate-option input[type="radio"] {
+      margin-right: 1rem;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .candidate-option label {
+      margin: 0;
+      cursor: pointer;
+      flex: 1;
+      font-size: 1rem;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 1rem;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-bottom: 1rem;
+    }
+
+    .submit-btn:hover {
+      background: #5568d3;
+    }
+
+    .submit-btn:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+    }
+
+    .admin-btn {
+      background: #38a169;
+      margin-bottom: 0.5rem;
+    }
+
+    .admin-btn:hover {
+      background: #2f855a;
+    }
+
+    .danger-btn {
+      background: #e53e3e;
+    }
+
+    .danger-btn:hover {
+      background: #c53030;
+    }
+
+    .message {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .message.success {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+
+    .message.error {
+      background: #fed7d7;
+      color: #742a2a;
+    }
+
+    .message.info {
+      background: #bee3f8;
+      color: #2c5282;
+    }
+
+    .message.warning {
+      background: #fef5e7;
+      color: #744210;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      margin-right: 0.5rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .results-section {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 2px solid #e2e8f0;
+    }
+
+    .results-section h2 {
+      color: #1a202c;
+      font-size: 1.5rem;
+      margin: 0 0 1rem 0;
+      text-align: center;
+    }
+
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background: #f7fafc;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+    }
+
+    .result-name {
+      font-weight: 600;
+      color: #2d3748;
+    }
+
+    .result-votes {
+      background: #667eea;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .admin-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .admin-controls .submit-btn {
+      margin-bottom: 0;
+    }
+
+    .election-status {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .status-active {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+
+    .status-inactive {
+      background: #fed7d7;
+      color: #742a2a;
+    }
+
+    .status-scheduled {
+      background: #fef5e7;
+      color: #744210;
+    }
+
+    .timer-display {
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-align: center;
+      margin: 1rem 0;
+    }
+
+    .role-selector {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .role-btn {
+      padding: 0.75rem 1.5rem;
+      margin: 0 0.5rem;
+      background: #e2e8f0;
+      color: #2d3748;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .role-btn.active {
+      background: #667eea;
+      color: white;
+    }
+
+    .role-btn:hover {
+      background: #cbd5e0;
+    }
+
+    .role-btn.active:hover {
+      background: #5568d3;
+    }
+
+    .datetime-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .published-results {
+      background: #c6f6d5;
+      border: 2px solid #38a169;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+
+    .published-results h3 {
+      color: #22543d;
+      margin: 0 0 1rem 0;
+      text-align: center;
+    }
+
+    .student-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background: #f7fafc;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+    }
+
+    .student-info {
+      flex: 1;
+    }
+
+    .student-name {
+      font-weight: 600;
+      color: #2d3748;
+    }
+
+    .student-email {
+      color: #718096;
+      font-size: 0.9rem;
+    }
+
+    .delete-student-btn {
+      background: #e53e3e;
+      color: white;
+      border: none;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: background 0.3s;
+    }
+
+    .delete-student-btn:hover {
+      background: #c53030;
+    }
+
+    #student-management {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 2px solid #e2e8f0;
+    }
+
+    #student-management h3, #student-management h4 {
+      color: #1a202c;
+      margin-bottom: 1rem;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="container"><!-- Role Selection -->
+   <div id="role-selection">
+    <div class="header">
+     <h1>Election System</h1>
+     <p>Choose your role to continue</p>
+    </div>
+    <div class="role-selector"><button class="role-btn" id="student-role-btn">Student Login</button> <button class="role-btn" id="admin-role-btn">Admin Portal</button>
+    </div>
+   </div><!-- Student Login Page -->
+   <div id="student-login-page" style="display: none;">
+    <div class="header">
+     <h1 id="login-title">Student Login</h1>
+     <p>Enter your registered credentials to access the voting system</p>
+    </div>
+    <div id="student-message-container"></div>
+    <form id="student-login-form">
+     <div class="form-group"><label for="student-email">Student Email</label> <input type="email" id="student-email" required placeholder="your.email@school.edu">
+     </div>
+     <div class="form-group"><label for="student-password">Password</label> <input type="password" id="student-password" required placeholder="Enter your password">
+     </div><button type="submit" class="submit-btn" id="student-login-btn">Login to Vote</button> <button type="button" class="submit-btn" id="back-to-role-btn" style="background: #718096;">Back</button>
+    </form>
+   </div><!-- Admin Login Page -->
+   <div id="admin-login-page" style="display: none;">
+    <div class="header">
+     <h1 id="admin-title">Election Admin Portal</h1>
+     <p>Admin access required for election management</p>
+    </div>
+    <div id="admin-login-message-container"></div>
+    <form id="admin-login-form">
+     <div class="form-group"><label for="admin-username">Admin Username</label> <input type="text" id="admin-username" required>
+     </div>
+     <div class="form-group"><label for="admin-password">Admin Password</label> <input type="password" id="admin-password" required>
+     </div><button type="submit" class="submit-btn" id="admin-login-btn">Admin Login</button> <button type="button" class="submit-btn" id="back-to-role-admin-btn" style="background: #718096;">Back</button>
+    </form>
+   </div><!-- Admin Dashboard -->
+   <div id="admin-dashboard" style="display: none;">
+    <div class="header">
+     <div class="user-info"><span>Admin Dashboard</span> <button id="admin-logout-btn" class="logout-btn">Logout</button>
+     </div>
+     <h1>Election Management</h1>
+    </div>
+    <div id="admin-message-container"></div>
+    <div id="election-status-display" class="election-status status-inactive">
+     Election Status: <span id="status-text">Not Started</span>
+    </div>
+    <div id="timer-display" class="timer-display" style="display: none;"></div>
+    <div class="admin-controls"><button class="submit-btn admin-btn" id="manage-students-btn">Manage Students</button> <button class="submit-btn admin-btn" id="manage-candidates-btn">Manage Candidates</button> <button class="submit-btn admin-btn" id="start-election-btn">Start Election</button> <button class="submit-btn danger-btn" id="stop-election-btn">Stop Election</button> <button class="submit-btn admin-btn" id="schedule-election-btn">Schedule Election</button> <button class="submit-btn admin-btn" id="publish-results-btn">Publish Results</button>
+    </div>
+    <div id="student-management" style="display: none;">
+     <h3>Student Management</h3>
+     <form id="add-student-form">
+      <div class="form-group"><label for="new-student-name">Student Name</label> <input type="text" id="new-student-name" required placeholder="Enter student name">
+      </div>
+      <div class="form-group"><label for="new-student-email">Student Email</label> <input type="email" id="new-student-email" required placeholder="student@school.edu">
+      </div>
+      <div class="form-group"><label for="new-student-password">Student Password</label> <input type="password" id="new-student-password" required placeholder="Enter password">
+      </div><button type="submit" class="submit-btn admin-btn" id="add-student-btn">Add Student</button> <button type="button" class="submit-btn" id="cancel-student-btn" style="background: #718096;">Cancel</button>
+     </form>
+     <div id="students-list">
+      <h4>Registered Students</h4>
+      <div id="students-container"></div>
+     </div>
+    </div>
+    <div id="candidate-management" style="display: none;">
+     <h3>Candidate Management</h3>
+     <form id="add-candidate-form">
+      <div class="form-group"><label for="new-candidate-name">Candidate Name</label> <input type="text" id="new-candidate-name" required placeholder="Enter candidate name">
+      </div><button type="submit" class="submit-btn admin-btn" id="add-candidate-btn">Add Candidate</button> <button type="button" class="submit-btn" id="cancel-candidate-btn" style="background: #718096;">Cancel</button>
+     </form>
+     <div id="candidates-list">
+      <h4>Current Candidates</h4>
+      <div id="candidates-container"></div>
+     </div>
+    </div>
+    <div id="schedule-form" style="display: none;">
+     <div class="form-group"><label>Election Schedule</label>
+      <div class="datetime-group">
+       <div><label for="election-start-time">Start Time</label> <input type="datetime-local" id="election-start-time" required>
+       </div>
+       <div><label for="election-end-time">End Time</label> <input type="datetime-local" id="election-end-time" required>
+       </div>
+      </div>
+     </div><button class="submit-btn admin-btn" id="save-schedule-btn">Save Schedule</button> <button class="submit-btn" id="cancel-schedule-btn" style="background: #718096;">Cancel</button>
+    </div>
+    <div class="results-section">
+     <h2>Live Results</h2>
+     <div id="admin-results-container"></div>
+     <div id="published-results-display" style="display: none;"></div>
+    </div>
+   </div><!-- Student Voting Page -->
+   <div id="voting-page" style="display: none;">
+    <div class="header">
+     <div class="user-info"><span>Logged in as: <strong id="user-email"></strong></span> <button id="student-logout-btn" class="logout-btn">Logout</button>
+     </div>
+     <h1 id="voting-title">Class Representative Election</h1>
+     <p id="voting-instructions">Select your preferred candidate and submit your vote</p>
+    </div>
+    <div id="voting-message-container"></div>
+    <div id="election-closed-notice" class="message info" style="display: none;">
+     The election is currently closed. Please check back during voting hours.
+    </div>
+    <form id="voting-form">
+     <div class="form-group candidates"><label>Choose Your Candidate</label>
+      <div id="voting-candidates-container"><!-- Candidates will be dynamically loaded here -->
+      </div>
+     </div><button type="submit" class="submit-btn" id="submit-vote-btn">Cast My Vote</button>
+    </form>
+    <div class="results-section" id="student-results-section" style="display: none;">
+     <h2>Official Results</h2>
+     <div id="student-results-container"></div>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      login_title: "Student Login",
+      admin_title: "Election Admin Portal",
+      voting_title: "Class Representative Election",
+      voting_instructions: "Select your preferred candidate and submit your vote",
+      candidate_1: "Sarah Johnson",
+      candidate_2: "Michael Chen",
+      candidate_3: "Emma Rodriguez",
+      admin_username: "hudai pera",
+      admin_password: "ar nibo na",
+      background_color: "#667eea",
+      surface_color: "#ffffff",
+      text_color: "#1a202c",
+      primary_action_color: "#667eea",
+      secondary_action_color: "#718096",
+      font_family: "sans-serif",
+      font_size: 16
+    };
+
+    let allRecords = [];
+    let currentUser = null;
+    let currentRole = null;
+    let electionTimer = null;
+    let isSubmitting = false;
+
+    const dataHandler = {
+      onDataChanged(data) {
+        allRecords = data;
+        updateResults();
+        updateElectionStatus();
+        if (currentRole === 'admin') {
+          if (document.getElementById('student-management').style.display === 'block') {
+            updateStudentsList();
+          }
+          if (document.getElementById('candidate-management').style.display === 'block') {
+            updateCandidatesList();
+          }
+        }
+        if (currentRole === 'student') {
+          updateVotingCandidates();
+        }
+      }
+    };
+
+    async function onConfigChange(config) {
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseFontStack = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif';
+      const fontFamily = `${customFont}, ${baseFontStack}`;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      document.body.style.fontFamily = fontFamily;
+      document.body.style.background = `linear-gradient(135deg, ${config.background_color || defaultConfig.background_color} 0%, ${config.primary_action_color || defaultConfig.primary_action_color} 100%)`;
+      
+      const container = document.querySelector('.container');
+      container.style.background = config.surface_color || defaultConfig.surface_color;
+      
+      // Update text content
+      document.getElementById('login-title').textContent = config.login_title || defaultConfig.login_title;
+      document.getElementById('admin-title').textContent = config.admin_title || defaultConfig.admin_title;
+      document.getElementById('voting-title').textContent = config.voting_title || defaultConfig.voting_title;
+      document.getElementById('voting-instructions').textContent = config.voting_instructions || defaultConfig.voting_instructions;
+      
+      // Admin fields have no placeholders
+      
+      // Apply styling
+      const headings = document.querySelectorAll('h1');
+      headings.forEach(h => {
+        h.style.color = config.text_color || defaultConfig.text_color;
+        h.style.fontSize = `${baseSize * 2}px`;
+      });
+      
+      const buttons = document.querySelectorAll('.submit-btn');
+      buttons.forEach(btn => {
+        if (!btn.classList.contains('admin-btn') && !btn.classList.contains('danger-btn')) {
+          btn.style.background = config.primary_action_color || defaultConfig.primary_action_color;
+        }
+        btn.style.fontSize = `${baseSize * 1.1}px`;
+      });
+      
+      const labels = document.querySelectorAll('label');
+      labels.forEach(label => {
+        label.style.color = config.text_color || defaultConfig.text_color;
+        label.style.fontSize = `${baseSize * 0.9}px`;
+      });
+    }
+
+    function showMessage(text, type, container = 'student') {
+      const containerId = container + '-message-container';
+      const messageContainer = document.getElementById(containerId);
+      if (messageContainer) {
+        messageContainer.innerHTML = `<div class="message ${type}">${text}</div>`;
+        setTimeout(() => {
+          messageContainer.innerHTML = '';
+        }, 5000);
+      }
+    }
+
+    function showRoleSelection() {
+      document.getElementById('role-selection').style.display = 'block';
+      document.getElementById('student-login-page').style.display = 'none';
+      document.getElementById('admin-login-page').style.display = 'none';
+      document.getElementById('admin-dashboard').style.display = 'none';
+      document.getElementById('voting-page').style.display = 'none';
+      currentUser = null;
+      currentRole = null;
+    }
+
+    function showStudentLogin() {
+      document.getElementById('role-selection').style.display = 'none';
+      document.getElementById('student-login-page').style.display = 'block';
+      document.getElementById('admin-login-page').style.display = 'none';
+      document.getElementById('admin-dashboard').style.display = 'none';
+      document.getElementById('voting-page').style.display = 'none';
+    }
+
+    function showAdminLogin() {
+      document.getElementById('role-selection').style.display = 'none';
+      document.getElementById('student-login-page').style.display = 'none';
+      document.getElementById('admin-login-page').style.display = 'block';
+      document.getElementById('admin-dashboard').style.display = 'none';
+      document.getElementById('voting-page').style.display = 'none';
+    }
+
+    function showAdminDashboard() {
+      document.getElementById('role-selection').style.display = 'none';
+      document.getElementById('student-login-page').style.display = 'none';
+      document.getElementById('admin-login-page').style.display = 'none';
+      document.getElementById('admin-dashboard').style.display = 'block';
+      document.getElementById('voting-page').style.display = 'none';
+      currentRole = 'admin';
+      updateElectionStatus();
+    }
+
+    function showVotingPage(userEmail) {
+      document.getElementById('role-selection').style.display = 'none';
+      document.getElementById('student-login-page').style.display = 'none';
+      document.getElementById('admin-login-page').style.display = 'none';
+      document.getElementById('admin-dashboard').style.display = 'none';
+      document.getElementById('voting-page').style.display = 'block';
+      document.getElementById('user-email').textContent = userEmail;
+      currentUser = userEmail;
+      currentRole = 'student';
+      
+      updateVotingCandidates();
+      checkElectionAccess();
+    }
+
+    function getElectionConfig() {
+      return allRecords.find(record => record.record_type === 'election_config') || null;
+    }
+
+    function isElectionActive() {
+      const config = getElectionConfig();
+      if (!config) return false;
+      
+      const now = new Date();
+      const start = config.election_start ? new Date(config.election_start) : null;
+      const end = config.election_end ? new Date(config.election_end) : null;
+      
+      if (config.election_status === 'active') {
+        if (start && end) {
+          return now >= start && now <= end;
+        }
+        return true;
+      }
+      
+      return false;
+    }
+
+    function checkElectionAccess() {
+      const active = isElectionActive();
+      const votingForm = document.getElementById('voting-form');
+      const closedNotice = document.getElementById('election-closed-notice');
+      
+      if (active) {
+        votingForm.style.display = 'block';
+        closedNotice.style.display = 'none';
+        
+        // Check if user has already voted
+        const hasVoted = allRecords.some(record => 
+          record.record_type === 'vote' && record.student_email === currentUser
+        );
+        
+        if (hasVoted) {
+          showMessage('You have already voted in this election. You can view the results below.', 'info', 'voting');
+          votingForm.style.display = 'none';
+        }
+      } else {
+        votingForm.style.display = 'none';
+        closedNotice.style.display = 'block';
+      }
+    }
+
+    function updateElectionStatus() {
+      const config = getElectionConfig();
+      const statusDisplay = document.getElementById('election-status-display');
+      const statusText = document.getElementById('status-text');
+      const timerDisplay = document.getElementById('timer-display');
+      
+      if (!config) {
+        statusDisplay.className = 'election-status status-inactive';
+        statusText.textContent = 'Not Configured';
+        timerDisplay.style.display = 'none';
+        return;
+      }
+      
+      const now = new Date();
+      const start = config.election_start ? new Date(config.election_start) : null;
+      const end = config.election_end ? new Date(config.election_end) : null;
+      
+      if (config.election_status === 'active') {
+        if (start && end) {
+          if (now < start) {
+            statusDisplay.className = 'election-status status-scheduled';
+            statusText.textContent = 'Scheduled';
+            showCountdown(start, 'Starts in: ');
+          } else if (now <= end) {
+            statusDisplay.className = 'election-status status-active';
+            statusText.textContent = 'Active';
+            showCountdown(end, 'Ends in: ');
+          } else {
+            statusDisplay.className = 'election-status status-inactive';
+            statusText.textContent = 'Ended';
+            timerDisplay.style.display = 'none';
+          }
+        } else {
+          statusDisplay.className = 'election-status status-active';
+          statusText.textContent = 'Active (No Time Limit)';
+          timerDisplay.style.display = 'none';
+        }
+      } else {
+        statusDisplay.className = 'election-status status-inactive';
+        statusText.textContent = 'Stopped';
+        timerDisplay.style.display = 'none';
+      }
+      
+      if (currentRole === 'student') {
+        checkElectionAccess();
+      }
+    }
+
+    function showCountdown(targetDate, prefix) {
+      const timerDisplay = document.getElementById('timer-display');
+      timerDisplay.style.display = 'block';
+      
+      if (electionTimer) clearInterval(electionTimer);
+      
+      electionTimer = setInterval(() => {
+        const now = new Date();
+        const diff = targetDate - now;
+        
+        if (diff <= 0) {
+          clearInterval(electionTimer);
+          updateElectionStatus();
+          return;
+        }
+        
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        timerDisplay.textContent = `${prefix}${hours}h ${minutes}m ${seconds}s`;
+      }, 1000);
+    }
+
+    function updateResults() {
+      const votes = allRecords.filter(record => record.record_type === 'vote');
+      const publishedResults = allRecords.find(record => record.record_type === 'published_results');
+      const candidates = getCurrentCandidates();
+      
+      const voteCounts = {};
+      candidates.forEach(candidate => {
+        voteCounts[candidate] = 0;
+      });
+      
+      votes.forEach(vote => {
+        if (voteCounts.hasOwnProperty(vote.candidate_name)) {
+          voteCounts[vote.candidate_name]++;
+        }
+      });
+      
+      // Update admin results (always visible to admin)
+      const adminContainer = document.getElementById('admin-results-container');
+      if (adminContainer && currentRole === 'admin') {
+        adminContainer.innerHTML = '';
+        Object.entries(voteCounts).forEach(([name, count]) => {
+          const resultItem = document.createElement('div');
+          resultItem.className = 'result-item';
+          resultItem.innerHTML = `
+            <span class="result-name">${name}</span>
+            <span class="result-votes">${count} ${count === 1 ? 'vote' : 'votes'}</span>
+          `;
+          adminContainer.appendChild(resultItem);
+        });
+      }
+      
+      // Update student results (only if results are published)
+      const studentContainer = document.getElementById('student-results-container');
+      const studentResultsSection = document.getElementById('student-results-section');
+      if (studentContainer && studentResultsSection && currentRole === 'student') {
+        if (publishedResults) {
+          studentResultsSection.style.display = 'block';
+          studentContainer.innerHTML = '';
+          Object.entries(voteCounts).forEach(([name, count]) => {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item';
+            resultItem.innerHTML = `
+              <span class="result-name">${name}</span>
+              <span class="result-votes">${count} ${count === 1 ? 'vote' : 'votes'}</span>
+            `;
+            studentContainer.appendChild(resultItem);
+          });
+        } else {
+          studentResultsSection.style.display = 'none';
+        }
+      }
+      
+      // Show published results notice
+      const publishedDisplay = document.getElementById('published-results-display');
+      if (publishedDisplay && publishedResults) {
+        publishedDisplay.style.display = 'block';
+        publishedDisplay.innerHTML = `
+          <div class="published-results">
+            <h3>🎉 Official Results Published</h3>
+            <p>Results were officially published on ${new Date(publishedResults.admin_timestamp).toLocaleString()}</p>
+          </div>
+        `;
+      } else if (publishedDisplay) {
+        publishedDisplay.style.display = 'none';
+      }
+    }
+
+    function getCurrentCandidates() {
+      const config = getElectionConfig();
+      if (config && config.election_candidates) {
+        try {
+          return JSON.parse(config.election_candidates);
+        } catch (e) {
+          return ['Sarah Johnson', 'Michael Chen', 'Emma Rodriguez'];
+        }
+      }
+      return ['Sarah Johnson', 'Michael Chen', 'Emma Rodriguez'];
+    }
+
+    function updateCandidatesList() {
+      const candidates = getCurrentCandidates();
+      const container = document.getElementById('candidates-container');
+      
+      if (candidates.length === 0) {
+        container.innerHTML = '<p style="color: #718096; text-align: center;">No candidates added yet.</p>';
+        return;
+      }
+      
+      container.innerHTML = '';
+      candidates.forEach((candidate, index) => {
+        const candidateItem = document.createElement('div');
+        candidateItem.className = 'student-item';
+        candidateItem.innerHTML = `
+          <div class="student-info">
+            <div class="student-name">${candidate}</div>
+          </div>
+          <button class="delete-student-btn" onclick="deleteCandidate(${index})">Delete</button>
+        `;
+        container.appendChild(candidateItem);
+      });
+    }
+
+    function updateVotingCandidates() {
+      const candidates = getCurrentCandidates();
+      const container = document.getElementById('voting-candidates-container');
+      
+      container.innerHTML = '';
+      candidates.forEach((candidate, index) => {
+        const candidateOption = document.createElement('div');
+        candidateOption.className = 'candidate-option';
+        candidateOption.setAttribute('data-candidate', index);
+        candidateOption.innerHTML = `
+          <input type="radio" name="candidate" id="candidate-${index}" value="${candidate}" required>
+          <label for="candidate-${index}">${candidate}</label>
+        `;
+        container.appendChild(candidateOption);
+        
+        // Add click handler
+        candidateOption.addEventListener('click', function() {
+          const radio = this.querySelector('input[type="radio"]');
+          radio.checked = true;
+          
+          document.querySelectorAll('.candidate-option').forEach(opt => {
+            opt.classList.remove('selected');
+          });
+          this.classList.add('selected');
+        });
+      });
+    }
+
+    function updateStudentsList() {
+      const students = allRecords.filter(record => record.record_type === 'student');
+      const container = document.getElementById('students-container');
+      
+      if (students.length === 0) {
+        container.innerHTML = '<p style="color: #718096; text-align: center;">No students registered yet.</p>';
+        return;
+      }
+      
+      container.innerHTML = '';
+      students.forEach(student => {
+        const studentItem = document.createElement('div');
+        studentItem.className = 'student-item';
+        studentItem.innerHTML = `
+          <div class="student-info">
+            <div class="student-name">${student.student_name}</div>
+            <div class="student-email">${student.student_email}</div>
+          </div>
+          <button class="delete-student-btn" onclick="deleteStudent('${student.__backendId}')">Delete</button>
+        `;
+        container.appendChild(studentItem);
+      });
+    }
+
+    window.deleteStudent = async function(studentId) {
+      if (isSubmitting) return;
+      
+      const student = allRecords.find(record => record.__backendId === studentId);
+      if (!student) return;
+      
+      isSubmitting = true;
+      const result = await window.dataSdk.delete(student);
+      isSubmitting = false;
+      
+      if (result.isOk) {
+        showMessage(`Student ${student.student_name} removed successfully.`, 'success', 'admin');
+      } else {
+        showMessage('Failed to remove student. Please try again.', 'error', 'admin');
+      }
+    };
+
+    window.deleteCandidate = async function(candidateIndex) {
+      if (isSubmitting) return;
+      
+      const candidates = getCurrentCandidates();
+      if (candidateIndex < 0 || candidateIndex >= candidates.length) return;
+      
+      const candidateName = candidates[candidateIndex];
+      candidates.splice(candidateIndex, 1);
+      
+      isSubmitting = true;
+      const existingConfig = getElectionConfig();
+      const configData = {
+        record_type: 'election_config',
+        election_status: existingConfig?.election_status || 'stopped',
+        election_start: existingConfig?.election_start || '',
+        election_end: existingConfig?.election_end || '',
+        results_published: existingConfig?.results_published || false,
+        election_candidates: JSON.stringify(candidates),
+        admin_action: 'remove_candidate',
+        admin_timestamp: new Date().toISOString()
+      };
+      
+      let result;
+      if (existingConfig) {
+        result = await window.dataSdk.update({ ...existingConfig, ...configData });
+      } else {
+        result = await window.dataSdk.create(configData);
+      }
+      
+      isSubmitting = false;
+      
+      if (result.isOk) {
+        showMessage(`Candidate ${candidateName} removed successfully.`, 'success', 'admin');
+        updateCandidatesList();
+      } else {
+        showMessage('Failed to remove candidate. Please try again.', 'error', 'admin');
+      }
+    };
+
+    // Role selection handlers
+    document.getElementById('student-role-btn').addEventListener('click', showStudentLogin);
+    document.getElementById('admin-role-btn').addEventListener('click', showAdminLogin);
+    document.getElementById('back-to-role-btn').addEventListener('click', showRoleSelection);
+    document.getElementById('back-to-role-admin-btn').addEventListener('click', showRoleSelection);
+
+    // Student login handler
+    document.getElementById('student-login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('student-email').value.trim();
+      const password = document.getElementById('student-password').value;
+      
+      if (!email || !password) {
+        showMessage('Please enter both email and password', 'error', 'student');
+        return;
+      }
+      
+      if (!email.includes('@')) {
+        showMessage('Please enter a valid email address', 'error', 'student');
+        return;
+      }
+      
+      // Check if student exists in the database
+      const registeredStudent = allRecords.find(record => 
+        record.record_type === 'student' && 
+        record.student_email === email && 
+        record.student_password === password
+      );
+      
+      if (!registeredStudent) {
+        showMessage('Invalid credentials. Please contact your administrator if you need access.', 'error', 'student');
+        return;
+      }
+      
+      showMessage('Login successful! Redirecting to voting page...', 'success', 'student');
+      setTimeout(() => {
+        showVotingPage(email);
+      }, 1500);
+    });
+
+    // Admin login handler
+    document.getElementById('admin-login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const config = window.elementSdk?.config || defaultConfig;
+      const username = document.getElementById('admin-username').value.trim();
+      const password = document.getElementById('admin-password').value;
+      
+      const correctUsername = config.admin_username || defaultConfig.admin_username;
+      const correctPassword = config.admin_password || defaultConfig.admin_password;
+      
+      if (username !== correctUsername || password !== correctPassword) {
+        showMessage('Invalid admin credentials. Access denied.', 'error', 'admin-login');
+        return;
+      }
+      
+      showMessage('Admin login successful!', 'success', 'admin-login');
+      setTimeout(() => {
+        showAdminDashboard();
+      }, 1000);
+    });
+
+    // Logout handlers
+    document.getElementById('student-logout-btn').addEventListener('click', showRoleSelection);
+    document.getElementById('admin-logout-btn').addEventListener('click', showRoleSelection);
+
+    // Student management handlers
+    document.getElementById('manage-students-btn').addEventListener('click', function() {
+      const studentManagement = document.getElementById('student-management');
+      studentManagement.style.display = studentManagement.style.display === 'none' ? 'block' : 'none';
+      if (studentManagement.style.display === 'block') {
+        updateStudentsList();
+      }
+    });
+
+    // Candidate management handlers
+    document.getElementById('manage-candidates-btn').addEventListener('click', function() {
+      const candidateManagement = document.getElementById('candidate-management');
+      candidateManagement.style.display = candidateManagement.style.display === 'none' ? 'block' : 'none';
+      if (candidateManagement.style.display === 'block') {
+        updateCandidatesList();
+      }
+    });
+
+    document.getElementById('cancel-student-btn').addEventListener('click', function() {
+      document.getElementById('student-management').style.display = 'none';
+      document.getElementById('add-student-form').reset();
+    });
+
+    document.getElementById('cancel-candidate-btn').addEventListener('click', function() {
+      document.getElementById('candidate-management').style.display = 'none';
+      document.getElementById('add-candidate-form').reset();
+    });
+
+    document.getElementById('add-student-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      if (isSubmitting) return;
+      
+      const name = document.getElementById('new-student-name').value.trim();
+      const email = document.getElementById('new-student-email').value.trim();
+      const password = document.getElementById('new-student-password').value;
+      
+      if (!name || !email || !password) {
+        showMessage('Please fill in all fields.', 'error', 'admin');
+        return;
+      }
+      
+      if (!email.includes('@')) {
+        showMessage('Please enter a valid email address.', 'error', 'admin');
+        return;
+      }
+      
+      // Check if student already exists
+      const existingStudent = allRecords.find(record => 
+        record.record_type === 'student' && record.student_email === email
+      );
+      
+      if (existingStudent) {
+        showMessage('A student with this email already exists.', 'error', 'admin');
+        return;
+      }
+      
+      const studentCount = allRecords.filter(record => record.record_type === 'student').length;
+      if (studentCount >= 999) {
+        showMessage('Maximum student limit reached.', 'error', 'admin');
+        return;
+      }
+      
+      isSubmitting = true;
+      const submitBtn = document.getElementById('add-student-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="loading"></span>Adding...';
+      
+      const studentData = {
+        record_type: 'student',
+        student_name: name,
+        student_email: email,
+        student_password: password
+      };
+      
+      const result = await window.dataSdk.create(studentData);
+      
+      isSubmitting = false;
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Add Student';
+      
+      if (result.isOk) {
+        showMessage(`Student ${name} added successfully!`, 'success', 'admin');
+        document.getElementById('add-student-form').reset();
+        updateStudentsList();
+      } else {
+        showMessage('Failed to add student. Please try again.', 'error', 'admin');
+      }
+    });
+
+    document.getElementById('add-candidate-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      if (isSubmitting) return;
+      
+      const name = document.getElementById('new-candidate-name').value.trim();
+      
+      if (!name) {
+        showMessage('Please enter a candidate name.', 'error', 'admin');
+        return;
+      }
+      
+      const candidates = getCurrentCandidates();
+      
+      // Check if candidate already exists
+      if (candidates.includes(name)) {
+        showMessage('A candidate with this name already exists.', 'error', 'admin');
+        return;
+      }
+      
+      if (candidates.length >= 10) {
+        showMessage('Maximum of 10 candidates allowed.', 'error', 'admin');
+        return;
+      }
+      
+      isSubmitting = true;
+      const submitBtn = document.getElementById('add-candidate-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="loading"></span>Adding...';
+      
+      candidates.push(name);
+      
+      const existingConfig = getElectionConfig();
+      const configData = {
+        record_type: 'election_config',
+        election_status: existingConfig?.election_status || 'stopped',
+        election_start: existingConfig?.election_start || '',
+        election_end: existingConfig?.election_end || '',
+        results_published: existingConfig?.results_published || false,
+        election_candidates: JSON.stringify(candidates),
+        admin_action: 'add_candidate',
+        admin_timestamp: new Date().toISOString()
+      };
+      
+      let result;
+      if (existingConfig) {
+        result = await window.dataSdk.update({ ...existingConfig, ...configData });
+      } else {
+        result = await window.dataSdk.create(configData);
+      }
+      
+      isSubmitting = false;
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Add Candidate';
+      
+      if (result.isOk) {
+        showMessage(`Candidate ${name} added successfully!`, 'success', 'admin');
+        document.getElementById('add-candidate-form').reset();
+        updateCandidatesList();
+      } else {
+        showMessage('Failed to add candidate. Please try again.', 'error', 'admin');
+      }
+    });
+
+    // Admin control handlers
+    document.getElementById('start-election-btn').addEventListener('click', async function() {
+      if (isSubmitting) return;
+      
+      isSubmitting = true;
+      this.disabled = true;
+      this.innerHTML = '<span class="loading"></span>Starting...';
+      
+      const existingConfig = getElectionConfig();
+      const configData = {
+        record_type: 'election_config',
+        election_status: 'active',
+        election_start: existingConfig?.election_start || '',
+        election_end: existingConfig?.election_end || '',
+        results_published: false,
+        admin_action: 'start_election',
+        admin_timestamp: new Date().toISOString()
+      };
+      
+      let result;
+      if (existingConfig) {
+        result = await window.dataSdk.update({ ...existingConfig, ...configData });
+      } else {
+        result = await window.dataSdk.create(configData);
+      }
+      
+      isSubmitting = false;
+      this.disabled = false;
+      this.innerHTML = 'Start Election';
+      
+      if (result.isOk) {
+        showMessage('Election started successfully!', 'success', 'admin');
+      } else {
+        showMessage('Failed to start election. Please try again.', 'error', 'admin');
+      }
+    });
+
+    document.getElementById('stop-election-btn').addEventListener('click', async function() {
+      if (isSubmitting) return;
+      
+      const existingConfig = getElectionConfig();
+      if (!existingConfig) {
+        showMessage('No election configuration found.', 'error', 'admin');
+        return;
+      }
+      
+      isSubmitting = true;
+      this.disabled = true;
+      this.innerHTML = '<span class="loading"></span>Stopping...';
+      
+      const result = await window.dataSdk.update({
+        ...existingConfig,
+        election_status: 'stopped',
+        admin_action: 'stop_election',
+        admin_timestamp: new Date().toISOString()
+      });
+      
+      isSubmitting = false;
+      this.disabled = false;
+      this.innerHTML = 'Stop Election';
+      
+      if (result.isOk) {
+        showMessage('Election stopped successfully!', 'success', 'admin');
+      } else {
+        showMessage('Failed to stop election. Please try again.', 'error', 'admin');
+      }
+    });
+
+    document.getElementById('schedule-election-btn').addEventListener('click', function() {
+      const scheduleForm = document.getElementById('schedule-form');
+      scheduleForm.style.display = scheduleForm.style.display === 'none' ? 'block' : 'none';
+      
+      // Set minimum datetime to now
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      const isoString = now.toISOString().slice(0, 16);
+      document.getElementById('election-start-time').min = isoString;
+      document.getElementById('election-end-time').min = isoString;
+    });
+
+    document.getElementById('cancel-schedule-btn').addEventListener('click', function() {
+      document.getElementById('schedule-form').style.display = 'none';
+    });
+
+    document.getElementById('save-schedule-btn').addEventListener('click', async function() {
+      if (isSubmitting) return;
+      
+      const startTime = document.getElementById('election-start-time').value;
+      const endTime = document.getElementById('election-end-time').value;
+      
+      if (!startTime || !endTime) {
+        showMessage('Please select both start and end times.', 'error', 'admin');
+        return;
+      }
+      
+      if (new Date(startTime) >= new Date(endTime)) {
+        showMessage('End time must be after start time.', 'error', 'admin');
+        return;
+      }
+      
+      isSubmitting = true;
+      this.disabled = true;
+      this.innerHTML = '<span class="loading"></span>Saving...';
+      
+      const existingConfig = getElectionConfig();
+      const configData = {
+        record_type: 'election_config',
+        election_status: 'active',
+        election_start: startTime,
+        election_end: endTime,
+        results_published: false,
+        admin_action: 'schedule_election',
+        admin_timestamp: new Date().toISOString()
+      };
+      
+      let result;
+      if (existingConfig) {
+        result = await window.dataSdk.update({ ...existingConfig, ...configData });
+      } else {
+        result = await window.dataSdk.create(configData);
+      }
+      
+      isSubmitting = false;
+      this.disabled = false;
+      this.innerHTML = 'Save Schedule';
+      
+      if (result.isOk) {
+        showMessage('Election scheduled successfully!', 'success', 'admin');
+        document.getElementById('schedule-form').style.display = 'none';
+      } else {
+        showMessage('Failed to schedule election. Please try again.', 'error', 'admin');
+      }
+    });
+
+    document.getElementById('publish-results-btn').addEventListener('click', async function() {
+      if (isSubmitting) return;
+      
+      const votes = allRecords.filter(record => record.record_type === 'vote');
+      if (votes.length === 0) {
+        showMessage('No votes to publish yet.', 'warning', 'admin');
+        return;
+      }
+      
+      isSubmitting = true;
+      this.disabled = true;
+      this.innerHTML = '<span class="loading"></span>Publishing...';
+      
+      const result = await window.dataSdk.create({
+        record_type: 'published_results',
+        results_published: true,
+        admin_action: 'publish_results',
+        admin_timestamp: new Date().toISOString()
+      });
+      
+      isSubmitting = false;
+      this.disabled = false;
+      this.innerHTML = 'Publish Results';
+      
+      if (result.isOk) {
+        showMessage('Results published successfully!', 'success', 'admin');
+      } else {
+        showMessage('Failed to publish results. Please try again.', 'error', 'admin');
+      }
+    });
+
+    // Candidate selection
+    document.querySelectorAll('.candidate-option').forEach(option => {
+      option.addEventListener('click', function() {
+        const radio = this.querySelector('input[type="radio"]');
+        radio.checked = true;
+        
+        document.querySelectorAll('.candidate-option').forEach(opt => {
+          opt.classList.remove('selected');
+        });
+        this.classList.add('selected');
+      });
+    });
+
+    // Voting form handler
+    document.getElementById('voting-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      if (isSubmitting || !currentUser) return;
+      
+      if (!isElectionActive()) {
+        showMessage('Election is not currently active.', 'error', 'voting');
+        return;
+      }
+      
+      const selectedCandidate = document.querySelector('input[name="candidate"]:checked');
+      
+      if (!selectedCandidate) {
+        showMessage('Please select a candidate', 'error', 'voting');
+        return;
+      }
+      
+      const hasVoted = allRecords.some(record => 
+        record.record_type === 'vote' && record.student_email === currentUser
+      );
+      if (hasVoted) {
+        showMessage('You have already voted in this election', 'info', 'voting');
+        return;
+      }
+      
+      const voteCount = allRecords.filter(record => record.record_type === 'vote').length;
+      if (voteCount >= 999) {
+        showMessage('Maximum vote limit reached. Please contact your administrator.', 'error', 'voting');
+        return;
+      }
+      
+      isSubmitting = true;
+      const submitBtn = document.getElementById('submit-vote-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="loading"></span>Submitting...';
+      
+      const candidateName = selectedCandidate.value;
+      
+      const voteData = {
+        record_type: 'vote',
+        student_email: currentUser,
+        candidate_name: candidateName,
+        voted_at: new Date().toISOString()
+      };
+      
+      const result = await window.dataSdk.create(voteData);
+      
+      isSubmitting = false;
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Cast My Vote';
+      
+      if (result.isOk) {
+        showMessage('Your vote has been recorded successfully!', 'success', 'voting');
+        document.getElementById('voting-form').style.display = 'none';
+      } else {
+        showMessage('Failed to record your vote. Please try again.', 'error', 'voting');
+      }
+    });
+
+    async function init() {
+      if (window.dataSdk) {
+        const initResult = await window.dataSdk.init(dataHandler);
+        if (!initResult.isOk) {
+          showMessage('Failed to initialize election system', 'error', 'student');
+        }
+      }
+      
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange,
+          mapToCapabilities: (config) => ({
+            recolorables: [
+              {
+                get: () => config.background_color || defaultConfig.background_color,
+                set: (value) => {
+                  config.background_color = value;
+                  window.elementSdk.setConfig({ background_color: value });
+                }
+              },
+              {
+                get: () => config.surface_color || defaultConfig.surface_color,
+                set: (value) => {
+                  config.surface_color = value;
+                  window.elementSdk.setConfig({ surface_color: value });
+                }
+              },
+              {
+                get: () => config.text_color || defaultConfig.text_color,
+                set: (value) => {
+                  config.text_color = value;
+                  window.elementSdk.setConfig({ text_color: value });
+                }
+              },
+              {
+                get: () => config.primary_action_color || defaultConfig.primary_action_color,
+                set: (value) => {
+                  config.primary_action_color = value;
+                  window.elementSdk.setConfig({ primary_action_color: value });
+                }
+              },
+              {
+                get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+                set: (value) => {
+                  config.secondary_action_color = value;
+                  window.elementSdk.setConfig({ secondary_action_color: value });
+                }
+              }
+            ],
+            borderables: [],
+            fontEditable: {
+              get: () => config.font_family || defaultConfig.font_family,
+              set: (value) => {
+                config.font_family = value;
+                window.elementSdk.setConfig({ font_family: value });
+              }
+            },
+            fontSizeable: {
+              get: () => config.font_size || defaultConfig.font_size,
+              set: (value) => {
+                config.font_size = value;
+                window.elementSdk.setConfig({ font_size: value });
+              }
+            }
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ["login_title", config.login_title || defaultConfig.login_title],
+            ["admin_title", config.admin_title || defaultConfig.admin_title],
+            ["voting_title", config.voting_title || defaultConfig.voting_title],
+            ["voting_instructions", config.voting_instructions || defaultConfig.voting_instructions],
+            ["admin_username", config.admin_username || defaultConfig.admin_username],
+            ["admin_password", config.admin_password || defaultConfig.admin_password]
+          ])
+        });
+        
+        await onConfigChange(window.elementSdk.config);
+      }
+    }
+
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9979cf67d30535aa',t:'MTc2MTk4MzUyMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
