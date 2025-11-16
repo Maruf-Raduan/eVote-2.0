@@ -1,5 +1,5 @@
 # eVote — Election Management System (single-file prototype)
-
+https://img.shields.io/badge/status-active-brightgreen
 A compact, single-file HTML prototype for a simple election / class representative voting system. The UI offers separate admin and student flows, candidate and student management, election scheduling, and results publishing. The file in this workspace is `eVote.html`.
 # 🗳️ eVote — Election Management System (Single-File Prototype)
 
